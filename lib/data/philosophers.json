@@ -1,0 +1,15 @@
+[
+    {
+      "id":1,
+      "name":"Marcus Aurelius",
+      "image":"assets/images/marcus.png",
+      "quotes": "assets/quotes/marcus.json"
+    },
+    {
+      "id":2,
+      "name": "Seneca",
+      "image":"assets/images/seneca.png",
+      "quotes": "assets/quotes/seneca.json"
+    }
+  ]
+  
