@@ -10,6 +10,12 @@
       "name": "Seneca",
       "image":"assets/images/seneca.png",
       "quotes": "assets/quotes/seneca.json"
+    },
+    {
+      "id": 3,
+      "name": "Albert Camus",
+      "image": "assets/images/camus.png",
+      "quotes": "assets/quotes/camus.json"
     }
   ]
   
