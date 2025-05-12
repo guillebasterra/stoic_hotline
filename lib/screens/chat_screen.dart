@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bubble/bubble.dart';                // ← new
 import 'package:stoic_hotline/core/theme/text_styles.dart';
+import 'package:stoic_hotline/core/theme/app_theme.dart';
 import 'package:stoic_hotline/models/philosopher.dart';
+import 'package:animations/animations.dart';
 import 'quote_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -22,7 +24,6 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
-  late Future<List<String>> _quotesFuture;
   String _displayedQuote = '';
 
   // new: whether to show the two bubble buttons
@@ -31,18 +32,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _quotesFuture = _loadQuotes();
   }
 
-  Future<List<String>> _loadQuotes() async {
-    final data = await DefaultAssetBundle.of(context)
-        .loadString(widget.philosopher.quotes);
-    final List<dynamic> jsonList = json.decode(data);
-    return jsonList.map((entry) {
-      final q = entry['quote'];
-      return (q is List) ? q.join('\n\n') : q.toString();
-    }).toList();
-  }
 
   @override
   void dispose() {
@@ -50,15 +41,6 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _consult() async {
-    final quotes = await _quotesFuture;
-    if (quotes.isNotEmpty) {
-      final random = Random().nextInt(quotes.length);
-      setState(() {
-        _displayedQuote = quotes[random];
-      });
-    }
-  }
 
   void _goBack() {
     Navigator.of(context).pop();
@@ -116,7 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
 
             // ---- Philosopher image ----
-                    Positioned(
+          Positioned(
           left: 0,
           right: 0,
           bottom: 10,
@@ -147,12 +129,12 @@ class _ChatScreenState extends State<ChatScreen> {
           left: 40,
           child: AnimatedScale(
             scale: _showOptions ? 1 : 0,
-            duration: Duration(milliseconds: 300),
+            duration: Duration(milliseconds: 600),
             curve: Curves.elasticOut,
             child: Bubble(
               nip: BubbleNip.rightBottom,
               elevation: 1,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.primary,
               child: Material(
                 color: Colors.transparent, // let the Bubble draw the white bg
                 child: InkWell(
@@ -168,44 +150,58 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
 
+
+        
         // Consult button
         Positioned(
-          bottom: _imageHeight + 24,
-          right: 40,
-          child: AnimatedScale(
-            scale: _showOptions ? 1 : 0,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.elasticOut,
-            child: Bubble(
-              nip: BubbleNip.leftBottom,
-              elevation: 1,
-              color: Colors.white,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => QuoteScreen(
-                          philosopher: widget.philosopher,
-                          userInput: _controller.text,
-                        ),
-                      ),
-                    );
-                    setState(() {
-                      _showOptions = false;
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Text('Consult',style: AppTextStyles.buttonStyle),
-                  ),
-                ),
+  bottom: _imageHeight + 24,
+  right: 40,
+  child: OpenContainer(
+    // 1) same 400 ms container transform
+    transitionDuration: const Duration(milliseconds: 800),
+    // 2) don’t draw or clip any closed‐container background—let Bubble paint itself
+    closedElevation: 0,
+    closedColor: Colors.transparent,
+    // clipBehavior none preserves Bubble’s nip
+    clipBehavior: Clip.none,
+    // 3) we’ll handle taps ourselves so keep OpenContainer from auto‐wiring it
+    tappable: false,
+
+    // CLOSED: your AnimatedScale + Bubble
+    closedBuilder: (context, openContainer) {
+      return AnimatedScale(
+        scale: _showOptions ? 1 : 0,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.elasticOut,
+        child: Bubble(
+          nip: BubbleNip.leftBottom,
+          elevation: 1,
+          color: Theme.of(context).colorScheme.primary,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(4),
+              onTap: () {
+                setState(() => _showOptions = false);
+                openContainer();
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Text('Consult', style: AppTextStyles.buttonStyle),
               ),
             ),
           ),
         ),
+      );
+    },
+
+    // OPEN: your QuoteScreen
+    openBuilder: (context, _) => QuoteScreen(
+      philosopher: widget.philosopher,
+      userInput: _controller.text,
+    ),
+  ),
+),
       ],
         ),
       ),

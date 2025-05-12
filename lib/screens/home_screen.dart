@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 closedColor: Theme.of(context).colorScheme.primary,
-                openColor: Colors.white,
+                openColor: const Color.fromARGB(255, 255, 255, 255),
                 closedBuilder: (BuildContext context, VoidCallback openContainer) {
                   // This is your “closed” state: a 200-wide button
                   return SizedBox(
