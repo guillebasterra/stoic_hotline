@@ -158,7 +158,7 @@ class _ChatScreenState extends State<ChatScreen> {
   right: 40,
   child: OpenContainer(
     // 1) same 400 ms container transform
-    transitionDuration: const Duration(milliseconds: 800),
+    transitionDuration: const Duration(milliseconds: 400),
     // 2) don’t draw or clip any closed‐container background—let Bubble paint itself
     closedElevation: 0,
     closedColor: Colors.transparent,
