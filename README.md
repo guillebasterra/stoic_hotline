@@ -1,6 +1,6 @@
 # Stoic Hotline
 
-Need some wisdom for an issue you're dealing with? 
+Need some wisdom? 
 
 In Stoic Hotline, you can pick a philosopher of your choice, describe your problem, and you will receive a relevant quote from your philosopher.
 
