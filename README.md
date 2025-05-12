@@ -1,16 +1,9 @@
-# stoic_hotline
+# Stoic Hotline
 
-A new Flutter project.
+Need some wisdom for an issue you're dealing with? 
 
-## Getting Started
+In Stoic Hotline, you can pick a philosopher of your choice, describe your problem, and you will receive a relevant quote from your philosopher.
 
-This project is a starting point for a Flutter application.
+The app is built in flutter, and performs semantic embedding on your text to match it to the most relevant quote out of a database of quotes from the philosopher you choose.
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
