@@ -11,7 +11,7 @@ class AppTheme {
       brightness: Brightness.light,
       primary: const Color(0xFFD69090),
       secondary: Colors.brown.shade700,
-      surface: const Color.fromARGB(255, 172, 172, 172),
+      surface: const Color.fromARGB(255, 253, 255, 217),
     ),
     textTheme: TextTheme(
       titleLarge: AppTextStyles.titleStyle,
