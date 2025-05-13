@@ -21,6 +21,10 @@ dependencies:
     sdk: flutter
   animations: ^2.0.0
   bubble: ^1.2.1
+  http: ^0.13.5
+  dio: ^5.8.0
+  flutter_dotenv: ^5.0.2
+  gestures: ^1.0.0
   cupertino_icons: ^1.0.8
 
   # The following adds the Cupertino Icons font to your application.
@@ -48,6 +52,7 @@ flutter:
     - assets/images/
     - assets/data/
     - assets/quotes/
+    - .env
   fonts:
     - family: Jersey 10
       fonts:

@@ -63,6 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const SizedBox(height: 12),
                   TextField(
                     controller: _controller,
                     decoration: InputDecoration.collapsed(
@@ -182,8 +183,19 @@ class _ChatScreenState extends State<ChatScreen> {
             child: InkWell(
               borderRadius: BorderRadius.circular(4),
               onTap: () {
-                setState(() => _showOptions = false);
-                openContainer();
+                if (_controller.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a problem.', style: AppTextStyles.subtitleStyle,),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                else{                
+                  setState(() => _showOptions = false);
+                  openContainer();}
+
               },
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

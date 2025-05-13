@@ -12,6 +12,7 @@ class AppTheme {
       primary: const Color(0xFFD69090),
       secondary: Colors.brown.shade700,
       surface: const Color.fromARGB(255, 253, 255, 217),
+      surfaceBright: const Color.fromARGB(255, 253, 255, 225),
     ),
     textTheme: TextTheme(
       titleLarge: AppTextStyles.titleStyle,
