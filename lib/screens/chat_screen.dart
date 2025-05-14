@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:bubble/bubble.dart';                // ← new
+import 'package:bubble/bubble.dart';
 import 'package:stoic_hotline/core/theme/text_styles.dart';
 import 'package:stoic_hotline/core/theme/app_theme.dart';
 import 'package:stoic_hotline/models/philosopher.dart';
@@ -25,19 +25,23 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   final SoundEffectsController _soundEffectsController = SoundEffectsController();
   String _displayedQuote = '';
-
-  // new: whether to show the two bubble buttons
   bool _showOptions = false;
 
   @override
   void initState() {
     super.initState();
+    // After the first frame, focus the text field so the keyboard pops up
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
   }
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -53,24 +57,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // adjust this if your image has a different height
     const double _imageHeight = 400;
 
     return Scaffold(
+      // Don't resize the body when the keyboard appears—let it overlay
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFFFFF7CC),
       body: SafeArea(
         child: Stack(
           children: [
-            // ---- Main content (textfield + quote) ----
+            // Main content: text field + displayed quote
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 12),
                   TextField(
                     controller: _controller,
+                    focusNode: _focusNode,
+                    autofocus: true,
                     decoration: InputDecoration.collapsed(
                       hintText: 'Describe your problem...',
                       hintStyle: AppTextStyles.titleStyle.copyWith(
@@ -87,10 +93,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     maxLength: 200,
                     maxLengthEnforcement: MaxLengthEnforcement.enforced,
                   ),
-
                   const SizedBox(height: 32),
                   const Spacer(),
-
                   if (_displayedQuote.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 120.0),
@@ -103,127 +107,116 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
 
-            // ---- Philosopher image ----
-          Positioned(
-          left: 0,
-          right: 0,
-          bottom: 10,
-          child: GestureDetector(
-            onTap: () {
-              // Play sound effect when the image is tapped
-              _soundEffectsController.playButtonClick();
-              setState(() {
-                _showOptions = !_showOptions;
-              });
-            },
-            child: Align(
-              alignment: Alignment.topCenter,
-              heightFactor: 1,
-              child: SizedBox(
-                height: _imageHeight,
-                child: Image.asset(
-                  widget.philosopher.image,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // ---- Speech bubbles (pop-in + ripple) ----
-        // Back button
-        Positioned(
-          bottom: _imageHeight + 24,
-          left: 40,
-          child: AnimatedScale(
-            scale: _showOptions ? 1 : 0,
-            duration: Duration(milliseconds: 600),
-            curve: Curves.elasticOut,
-            child: Bubble(
-              nip: BubbleNip.rightBottom,
-              elevation: 1,
-              color: Theme.of(context).colorScheme.primary,
-              child: Material(
-                color: Colors.transparent, // let the Bubble draw the white bg
-                child: InkWell(
-                  onTap: _playButtonSoundAndGoBack,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Text('Back', style: AppTextStyles.buttonStyle),
+            // Philosopher image (tappable to toggle options)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 10,
+              child: GestureDetector(
+                onTap: () {
+                  _soundEffectsController.playButtonClick();
+                  setState(() {
+                    _showOptions = !_showOptions;
+                  });
+                },
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: 1,
+                  child: SizedBox(
+                    height: _imageHeight,
+                    child: Image.asset(
+                      widget.philosopher.image,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
 
-
-        
-        // Consult button
-        Positioned(
-  bottom: _imageHeight + 24,
-  right: 40,
-  child: OpenContainer(
-    // 1) same 400 ms container transform
-    transitionDuration: const Duration(milliseconds: 400),
-    // 2) don’t draw or clip any closed‐container background—let Bubble paint itself
-    closedElevation: 0,
-    closedColor: Colors.transparent,
-    // clipBehavior none preserves Bubble’s nip
-    clipBehavior: Clip.none,
-    // 3) we’ll handle taps ourselves so keep OpenContainer from auto‐wiring it
-    tappable: false,
-
-    // CLOSED: your AnimatedScale + Bubble
-    closedBuilder: (context, openContainer) {
-      return AnimatedScale(
-        scale: _showOptions ? 1 : 0,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.elasticOut,
-        child: Bubble(
-          nip: BubbleNip.leftBottom,
-          elevation: 1,
-          color: Theme.of(context).colorScheme.primary,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(4),
-              onTap: () {
-                // Play sound effect when the button is tapped
-                _soundEffectsController.playButtonClick();
-                if (_controller.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please enter a problem.', style: AppTextStyles.subtitleStyle,),
-                      duration: Duration(seconds: 2),
+            // Back button bubble
+            Positioned(
+              bottom: _imageHeight + 24,
+              left: 40,
+              child: AnimatedScale(
+                scale: _showOptions ? 1 : 0,
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.elasticOut,
+                child: Bubble(
+                  nip: BubbleNip.rightBottom,
+                  elevation: 1,
+                  color: Theme.of(context).colorScheme.primary,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _playButtonSoundAndGoBack,
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Text('Back', style: AppTextStyles.buttonStyle),
+                      ),
                     ),
-                  );
-                  return;
-                }
-                else{                
-                  setState(() => _showOptions = false);
-                  openContainer();}
-
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Text('Consult', style: AppTextStyles.buttonStyle),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      );
-    },
 
-    // OPEN: your QuoteScreen
-    openBuilder: (context, _) => QuoteScreen(
-      philosopher: widget.philosopher,
-      userInput: _controller.text,
-    ),
-  ),
-),
-      ],
+            // Consult button bubble + open container
+            Positioned(
+              bottom: _imageHeight + 24,
+              right: 40,
+              child: OpenContainer(
+                transitionDuration: const Duration(milliseconds: 400),
+                closedElevation: 0,
+                closedColor: Colors.transparent,
+                clipBehavior: Clip.none,
+                tappable: false,
+                closedBuilder: (context, openContainer) {
+                  return AnimatedScale(
+                    scale: _showOptions ? 1 : 0,
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.elasticOut,
+                    child: Bubble(
+                      nip: BubbleNip.leftBottom,
+                      elevation: 1,
+                      color: Theme.of(context).colorScheme.primary,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(4),
+                          onTap: () {
+                            _soundEffectsController.playButtonClick();
+                            if (_controller.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Please enter a problem.',
+                                    style: AppTextStyles.subtitleStyle,
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                              return;
+                            } else {
+                              setState(() => _showOptions = false);
+                              openContainer();
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Text('Consult', style: AppTextStyles.buttonStyle),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                openBuilder: (context, _) => QuoteScreen(
+                  philosopher: widget.philosopher,
+                  userInput: _controller.text,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

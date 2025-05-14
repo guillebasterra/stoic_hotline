@@ -26,6 +26,7 @@ dependencies:
   flutter_dotenv: ^5.0.2
   gestures: ^1.0.0
   audioplayers: ^6.4.0
+  shared_preferences: ^2.0.15
   cupertino_icons: ^1.0.8
 
   # The following adds the Cupertino Icons font to your application.

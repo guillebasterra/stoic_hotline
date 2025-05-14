@@ -71,40 +71,63 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // NEW: show settings dialog
-  void _showSettings() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Settings', style: AppTextStyles.titleStyle),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Background Music', style: AppTextStyles.subtitleStyle),
-            StatefulBuilder(
-              builder: (context, setDialogState) {
-                return Switch(
-                  value: _musicController.isPlaying,
-                  onChanged: (enabled) {
-                    _musicController.toggleMusic();
-                    setDialogState(() {});
-                  },
-                );
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _soundEffectsController.playButtonClick();
-              Navigator.of(context).pop();
-            },
-            child: Text('Close', style: AppTextStyles.buttonStyle),
+void _showSettings() {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text('Settings', style: AppTextStyles.titleStyle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Background Music', style: AppTextStyles.subtitleStyle),
+              StatefulBuilder(
+                builder: (context, setDialogState) {
+                  return Switch(
+                    value: _musicController.isPlaying,
+                    onChanged: (enabled) {
+                      _musicController.toggleMusic();
+                      setDialogState(() {});
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Sound Effects', style: AppTextStyles.subtitleStyle),
+              StatefulBuilder(
+                builder: (context, setDialogState) {
+                  return Switch(
+                    value: _soundEffectsController.isEnabled,
+                    onChanged: (enabled) {
+                      _soundEffectsController.toggleSoundEffects();
+                      setDialogState(() {});
+                    },
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () {
+            _soundEffectsController.playButtonClick();
+            Navigator.of(context).pop();
+          },
+          child: Text('Close', style: AppTextStyles.buttonStyle),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Text(
                 'Welcome to\nStoic Hotline',
                 textAlign: TextAlign.center,
