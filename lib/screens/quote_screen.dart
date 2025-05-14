@@ -10,6 +10,7 @@ import 'package:stoic_hotline/core/theme/app_theme.dart';
 import 'package:stoic_hotline/core/theme/text_styles.dart';
 import 'package:stoic_hotline/models/philosopher.dart';
 import 'home_screen.dart';
+import '../core/sound_effects_controller.dart';
 
 class QuoteScreen extends StatefulWidget {
   final Philosopher philosopher;
@@ -26,6 +27,7 @@ class QuoteScreen extends StatefulWidget {
 }
 
 class _QuoteScreenState extends State<QuoteScreen> {
+  final SoundEffectsController _soundEffectsController = SoundEffectsController();
   late final Dio _dio;
   late final CancelToken _cancelToken;
   String? _quote;
@@ -149,11 +151,15 @@ Ensure it's a real quote. Do not hallucinate.
             children: [
               TextButton(
                 child: Text('Cancel', style: AppTextStyles.buttonStyle),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  _soundEffectsController.playButtonClick();
+                  Navigator.of(context).pop();
+                },
               ),
               TextButton(
                 child: Text('Yes', style: AppTextStyles.buttonStyle),
                 onPressed: () {
+                  _soundEffectsController.playButtonClick();
                   _cancelToken.cancel('User navigated home');
                   Navigator.pushAndRemoveUntil(
                     context,
@@ -274,7 +280,10 @@ Widget build(BuildContext context) {
                                   IconButton(
                                     icon: const Icon(Icons.chevron_left),
                                     onPressed: _currentPage > 0
-                                        ? () => setState(() => _currentPage--)
+                                        ? () {
+                                            _soundEffectsController.playButtonClick();
+                                            setState(() => _currentPage--);
+                                          }
                                         : null,
                                   ),
                                   Text(
@@ -284,7 +293,10 @@ Widget build(BuildContext context) {
                                   IconButton(
                                     icon: const Icon(Icons.chevron_right),
                                     onPressed: _currentPage < _pages.length - 1
-                                        ? () => setState(() => _currentPage++)
+                                        ? () {
+                                            _soundEffectsController.playButtonClick();
+                                            setState(() => _currentPage++);
+                                          }
                                         : null,
                                   ),
                                 ],
@@ -317,7 +329,12 @@ Widget build(BuildContext context) {
             right: 0,
             bottom: 0,
             child: GestureDetector(
-              onTap: _goHome,
+              onTap: 
+                () {
+                  _soundEffectsController.playButtonClick();
+                  _goHome();
+                },
+              
               child: SizedBox(
                 height: imageHeight,
                 child: Image.asset(

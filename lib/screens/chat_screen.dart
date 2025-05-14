@@ -9,6 +9,7 @@ import 'package:stoic_hotline/core/theme/app_theme.dart';
 import 'package:stoic_hotline/models/philosopher.dart';
 import 'package:animations/animations.dart';
 import 'quote_screen.dart';
+import '../core/sound_effects_controller.dart';
 
 class ChatScreen extends StatefulWidget {
   final Philosopher philosopher;
@@ -24,6 +25,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
+  final SoundEffectsController _soundEffectsController = SoundEffectsController();
   String _displayedQuote = '';
 
   // new: whether to show the two bubble buttons
@@ -34,16 +36,19 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
   }
 
-
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
-
   void _goBack() {
     Navigator.of(context).pop();
+  }
+
+  void _playButtonSoundAndGoBack() {
+    _soundEffectsController.playButtonClick();
+    _goBack();
   }
 
   @override
@@ -105,6 +110,8 @@ class _ChatScreenState extends State<ChatScreen> {
           bottom: 10,
           child: GestureDetector(
             onTap: () {
+              // Play sound effect when the image is tapped
+              _soundEffectsController.playButtonClick();
               setState(() {
                 _showOptions = !_showOptions;
               });
@@ -139,7 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Material(
                 color: Colors.transparent, // let the Bubble draw the white bg
                 child: InkWell(
-                  onTap: _goBack,
+                  onTap: _playButtonSoundAndGoBack,
                   borderRadius: BorderRadius.circular(4),
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -183,6 +190,8 @@ class _ChatScreenState extends State<ChatScreen> {
             child: InkWell(
               borderRadius: BorderRadius.circular(4),
               onTap: () {
+                // Play sound effect when the button is tapped
+                _soundEffectsController.playButtonClick();
                 if (_controller.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

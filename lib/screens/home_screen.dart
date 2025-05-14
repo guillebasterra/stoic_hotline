@@ -9,6 +9,7 @@ import '../core/music_controller.dart';           // ← import
 import '../models/philosopher.dart';
 import 'chat_screen.dart';
 import 'package:animations/animations.dart';
+import '../core/sound_effects_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final SoundEffectsController _soundEffectsController = SoundEffectsController();
   int _currentIndex = 0;
   late PageController _pageController;
   List<Philosopher> philosophers = [];
@@ -93,7 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              _soundEffectsController.playButtonClick();
+              Navigator.of(context).pop();
+            },
             child: Text('Close', style: AppTextStyles.buttonStyle),
           ),
         ],
@@ -112,7 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.settings,
                 color: AppTheme.lightTheme.colorScheme.onSurface),
-            onPressed: _showSettings,
+            onPressed: () {
+              _soundEffectsController.playButtonClick();
+              _showSettings();
+            },
           ),
         ],
       ),
@@ -181,8 +189,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           size: 40,
                         ),
                         onPressed: () {
-                          final prevPage = (_currentIndex - 1 + philosophers.length) %
-                              philosophers.length;
+                          _soundEffectsController.playButtonClick();
+                          final prevPage = (_currentIndex - 1 + philosophers.length) % philosophers.length;
                           _pageController.animateToPage(
                             prevPage,
                             duration: const Duration(milliseconds: 300),
@@ -201,8 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           size: 40,
                         ),
                         onPressed: () {
-                          final nextPage =
-                              (_currentIndex + 1) % philosophers.length;
+                          _soundEffectsController.playButtonClick();
+                          final nextPage = (_currentIndex + 1) % philosophers.length;
                           _pageController.animateToPage(
                             nextPage,
                             duration: const Duration(milliseconds: 300),
@@ -244,7 +252,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   return SizedBox(
                     width: 200,
                     child: ElevatedButton(
-                      onPressed: openContainer,
+                      onPressed: () {
+                        _soundEffectsController.playButtonClick();
+                        openContainer();
+                      },
                       style: ElevatedButton.styleFrom(
                         textStyle: AppTextStyles.buttonStyle,
                         elevation: 0,
