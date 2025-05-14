@@ -1,8 +1,11 @@
+// lib/screens/home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import '../core/theme/app_theme.dart';
 import '../core/theme/text_styles.dart';
+import '../core/music_controller.dart';           // ← import
 import '../models/philosopher.dart';
 import 'chat_screen.dart';
 import 'package:animations/animations.dart';
@@ -19,10 +22,16 @@ class _HomeScreenState extends State<HomeScreen> {
   late PageController _pageController;
   List<Philosopher> philosophers = [];
 
+  // NEW: music controller
+  late final MusicController _musicController;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0, viewportFraction: 0.8);
+
+    // NEW: instantiate controller
+    _musicController = MusicController();
   }
 
   @override
@@ -34,7 +43,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    // NEW: dispose audio resources
     super.dispose();
+  }
+  
+  void _toggleMusic() {
+    setState(() {
+      _musicController.toggleMusic();
+    });
   }
 
   Future<void> _loadPhilosophers() async {
@@ -52,16 +68,62 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // NEW: show settings dialog
+  void _showSettings() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Settings', style: AppTextStyles.titleStyle),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Background Music', style: AppTextStyles.subtitleStyle),
+            StatefulBuilder(
+              builder: (context, setDialogState) {
+                return Switch(
+                  value: _musicController.isPlaying,
+                  onChanged: (enabled) {
+                    _musicController.toggleMusic();
+                    setDialogState(() {});
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Close', style: AppTextStyles.buttonStyle),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // NEW: AppBar with settings icon
+      appBar: AppBar(
+        backgroundColor: AppTheme.lightTheme.colorScheme.surface,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings,
+                color: AppTheme.lightTheme.colorScheme.onSurface),
+            onPressed: _showSettings,
+          ),
+        ],
+      ),
+
       backgroundColor: AppTheme.lightTheme.colorScheme.surface,
       body: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               Text(
                 'Welcome to\nStoic Hotline',
                 textAlign: TextAlign.center,
@@ -119,7 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           size: 40,
                         ),
                         onPressed: () {
-                          final prevPage = (_currentIndex - 1 + philosophers.length) % philosophers.length;
+                          final prevPage = (_currentIndex - 1 + philosophers.length) %
+                              philosophers.length;
                           _pageController.animateToPage(
                             prevPage,
                             duration: const Duration(milliseconds: 300),
@@ -138,7 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           size: 40,
                         ),
                         onPressed: () {
-                          final nextPage = (_currentIndex + 1) % philosophers.length;
+                          final nextPage =
+                              (_currentIndex + 1) % philosophers.length;
                           _pageController.animateToPage(
                             nextPage,
                             duration: const Duration(milliseconds: 300),
@@ -175,8 +239,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 closedColor: Theme.of(context).colorScheme.primary,
                 openColor: const Color.fromARGB(255, 255, 255, 255),
-                closedBuilder: (BuildContext context, VoidCallback openContainer) {
-                  // This is your “closed” state: a 200-wide button
+                closedBuilder:
+                    (BuildContext context, VoidCallback openContainer) {
                   return SizedBox(
                     width: 200,
                     child: ElevatedButton(
@@ -193,7 +257,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
                 openBuilder: (BuildContext context, VoidCallback _) {
-                  // This is the “opened” state: your ChatScreen
                   final selected = philosophers[_currentIndex];
                   return ChatScreen(philosopher: selected);
                 },
